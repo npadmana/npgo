@@ -31,8 +31,10 @@ import (
 
 // Some common PETSc variables
 var (
-	NULL     = C.PETSC_NULL
-	NULLCHAR = C.petscNullChar()
+	NULL      = C.PETSC_NULL
+	NULLCHAR  = C.petscNullChar()
+	DECIDE    = int64(C.PETSC_DECIDE)
+	DETERMINE = int64(C.PETSC_DETERMINE)
 )
 
 // Fatal calls MPI_Abort
