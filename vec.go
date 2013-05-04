@@ -12,11 +12,15 @@ import "C"
 
 import (
 	"errors"
+	"reflect"
+	"unsafe"
 )
 
 // Define a wrapper type; nothing is exported
 type Vec struct {
-	v C.Vec
+	v   C.Vec
+	ptr *C.PetscScalar
+	Arr []float64 // Access local vector storage using Get/RestoreArray
 }
 
 // NewVec creates a new MPI vector of local size n
@@ -89,4 +93,56 @@ func (v *Vec) OwnRange() (int64, int64, error) {
 		return -1, -1, errors.New("Error getting Ownership Range")
 	}
 	return int64(clo), int64(chi), nil
+}
+
+// Range returns the ownership ranges of all processors
+func (v *Vec) Ranges() ([]int64, error) {
+	_, size := RankSize()
+	var ptr *C.PetscInt
+	perr := C.VecGetOwnershipRanges(v.v, &ptr)
+	if perr != 0 {
+		return nil, errors.New("Error getting ownership ranges")
+	}
+	var rr []int64
+	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&rr)))
+	sliceHeader.Cap = size + 1
+	sliceHeader.Len = size + 1
+	sliceHeader.Data = uintptr(unsafe.Pointer(ptr))
+	return rr, nil
+}
+
+// Set sets the vector to a value
+func (v *Vec) Set(a float64) error {
+	perr := C.VecSet(v.v, C.PetscScalar(a))
+	if perr != 0 {
+		return errors.New("Error in Set")
+	}
+	return nil
+}
+
+// GetArray sets the Arr 
+func (v *Vec) GetArray() error {
+	size, err := v.LocalSize()
+	if err != nil {
+		return err
+	}
+	perr := C.VecGetArray(v.v, &v.ptr)
+	if perr != 0 {
+		return errors.New("Error getting array")
+	}
+	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&v.Arr)))
+	sliceHeader.Cap = int(size)
+	sliceHeader.Len = int(size)
+	sliceHeader.Data = uintptr(unsafe.Pointer(v.ptr))
+	return nil
+}
+
+// RestoreArray undoes GetArray; this resets the slice as well to prevent accidents
+func (v *Vec) RestoreArray() error {
+	perr := C.VecRestoreArray(v.v, &v.ptr)
+	if perr != 0 {
+		return errors.New("Error restoring array")
+	}
+	v.Arr = v.Arr[0:0]
+	return nil
 }
