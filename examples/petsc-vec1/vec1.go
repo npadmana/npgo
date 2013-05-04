@@ -14,7 +14,7 @@ func main() {
 			petscgo.Fatal(err)
 		}
 	}()
-	rank, _ := petscgo.RankSize()
+	rank, size := petscgo.RankSize()
 
 	// Create a vector using the local size
 	v, err := petscgo.NewVec(5, petscgo.DETERMINE)
@@ -52,6 +52,11 @@ func main() {
 	petscgo.SyncPrintf("%d rank has local size %d [%d, %d]\n", rank, n1, lo, hi)
 	petscgo.SyncFlush()
 
+	// Set and then access the array
+	if err := v.Set(3.1415926); err != nil {
+		petscgo.Fatal(err)
+	}
+
 	// Try running ownershipranges
 	if rank == 0 {
 		rr, err := v.Ranges()
@@ -59,21 +64,34 @@ func main() {
 			petscgo.Fatal(err)
 		}
 		fmt.Println(rr)
+		if size > 2 {
+			ix := []int64{rr[1], rr[2], rr[3]}
+			y := []float64{4.14, 5.14, 6.14}
+			v.SetValues(ix, y, true)
+		}
 	}
+	v.AssemblyBegin()
+	v.AssemblyEnd()
 
-	// Set and then access the array
-	if err := v.Set(3.1415926); err != nil {
-		petscgo.Fatal(err)
-	}
 	if err := v.GetArray(); err != nil {
 		petscgo.Fatal(err)
 	}
 	petscgo.SyncPrintf("%d rank has local size %d \n", rank, len(v.Arr))
 	petscgo.SyncFlush()
-	fmt.Println(v.Arr[0:2])
+	fmt.Println(rank, v.Arr[0:2])
 	if err := v.RestoreArray(); err != nil {
 		petscgo.Fatal(err)
 	}
+
+	sum, _ := v.Sum()
+	petscgo.Printf("Sum = %f\n", sum)
+	max, _, _ := v.Max()
+	petscgo.Printf("Max = %f\n", max)
+	min, _, _ := v.Min()
+	petscgo.Printf("Max = %f\n", min)
+	v.Scale(0.3)
+	sum, _ = v.Sum()
+	petscgo.Printf("Sum = %f\n", sum)
 
 	err = v.Destroy()
 	if err != nil {
