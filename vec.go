@@ -285,3 +285,39 @@ func (v *Vec) Norm(n Norms) (float64, error) {
 	}
 	return float64(val), nil
 }
+
+// AXPBY sets y = alpha x + beta y
+func (y *Vec) AXPBY(x *Vec, alpha, beta float64) error {
+	perr := C.VecAXPBY(y.v, C.PetscScalar(alpha), C.PetscScalar(beta), x.v)
+	if perr != 0 {
+		return errors.New("Error in AXPBY")
+	}
+	return nil
+}
+
+// AXPY sets y = alpha x + y
+func (y *Vec) AXPY(x *Vec, alpha float64) error {
+	perr := C.VecAXPY(y.v, C.PetscScalar(alpha), x.v)
+	if perr != 0 {
+		return errors.New("Error in AXPY")
+	}
+	return nil
+}
+
+// AYPX sets y = x + alpha y
+func (y *Vec) AYPX(x *Vec, alpha float64) error {
+	perr := C.VecAYPX(y.v, C.PetscScalar(alpha), x.v)
+	if perr != 0 {
+		return errors.New("Error in AYPX")
+	}
+	return nil
+}
+
+// WAXPY sets w = alpha x +  y
+func (w *Vec) WAXPY(x, y *Vec, alpha float64) error {
+	perr := C.VecWAXPY(w.v, C.PetscScalar(alpha), x.v, y.v)
+	if perr != 0 {
+		return errors.New("Error in AYPX")
+	}
+	return nil
+}
