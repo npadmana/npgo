@@ -13,7 +13,7 @@ setting below
 */
 
 /*
-#cgo pkg-config: petsc ompi
+#cgo pkg-config: PETSc ompi
 
 #include <stddef.h>
 #include "petsc.h"
