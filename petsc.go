@@ -15,6 +15,7 @@ setting below
 /*
 #cgo pkg-config: petsc ompi
 
+#include <stddef.h>
 #include "petsc.h"
 #include "mypetsc.h"
 
@@ -31,7 +32,7 @@ import (
 
 // Some common PETSc variables
 var (
-	NULL      = C.PETSC_NULL
+	NULL      = 0   // PETSC_NULL is defined the same way, and deprecated in 3.4
 	NULLCHAR  = C.petscNullChar()
 	DECIDE    = int64(C.PETSC_DECIDE)
 	DETERMINE = int64(C.PETSC_DETERMINE)

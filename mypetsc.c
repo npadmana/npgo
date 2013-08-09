@@ -13,7 +13,7 @@ void petscAbort() {
 }
 
 char* petscNullChar() {
-	return (char*) PETSC_NULL;
+	return (char*) NULL;
 };
 
 void petscRankSize(int *rank, int *size) {
