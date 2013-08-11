@@ -12,7 +12,7 @@ type Particle map[string]*petscgo.Vec
 // Define LocalParticle
 type LocalParticle map[string]([]float64)
 
-// New returns a Particle class. local/global defines the size of the array, while 
+// New returns a Particle class. local/global defines the size of the array, while
 // fieldnames is the list of field names
 func New(fieldnames []string, local, global int64) (*Particle, error) {
 	pp := make(Particle, len(fieldnames))
@@ -86,9 +86,7 @@ func (pp *Particle) GetArray(fieldnames []string) (*LocalParticle, error) {
 		if err := v.GetArray(); err != nil {
 			return nil, err
 		}
-	}
-	for _, ff := range fieldnames {
-		lpp[ff] = ((*pp)[ff]).Arr
+		lpp[ff] = v.Arr
 	}
 	return &lpp, nil
 }
@@ -96,7 +94,7 @@ func (pp *Particle) GetArray(fieldnames []string) (*LocalParticle, error) {
 // RestoreArrays restores individual arrays
 func (pp *Particle) RestoreArray(lpp *LocalParticle) error {
 	for k := range *lpp {
-		(*lpp)[k] = (*lpp)[k][0:0]
+		delete(*lpp, k)
 		if err := (*pp)[k].RestoreArray(); err != nil {
 			return err
 		}
