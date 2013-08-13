@@ -3,6 +3,10 @@ package particles
 
 import (
 	"errors"
+	"fmt"
+	"io"
+
+	"github.com/npadmana/mpi"
 	"github.com/npadmana/petscgo"
 )
 
@@ -100,4 +104,75 @@ func (pp Particle) RestoreArray(lpp LocalParticle) error {
 		}
 	}
 	return nil
+}
+
+// Dump writes out particles to an io.Writer instance
+func (pp Particle) Dump(w io.Writer, fieldnames []string, format []string, hdr bool) error {
+	nfields := len(fieldnames)
+
+	var fmts []string
+	switch len(format) {
+	case 1:
+		fmts = make([]string, nfields)
+		for i := range fmts {
+			fmts[i] = format[0]
+		}
+	case nfields:
+		fmts = format
+	default:
+		return errors.New("format must have length 1 or len(fieldnames)")
+	}
+
+	// Get rank and size
+	rank, size := petscgo.RankSize()
+
+	// Get size of array
+	v, ok := pp[fieldnames[0]]
+	if !ok {
+		return errors.New("Error accessing field when getting size")
+	}
+	npart, err := v.Size()
+	if err != nil {
+		return err
+	}
+
+	lpp1 := make([][]float64, nfields)
+	if lpp, err := pp.GetArray(fieldnames); err == nil {
+		for i, fns := range fieldnames {
+			lpp1[i] = lpp[fns]
+		}
+
+		nlocal := len(lpp1[0])
+
+		for irank := 0; irank < size; irank++ {
+			if irank == rank {
+				if hdr {
+					if irank == 0 {
+						fmt.Fprint(w, "# ")
+						for _, fns := range fieldnames {
+							fmt.Fprint(w, fns, " ")
+						}
+						fmt.Fprint(w, "\n")
+					}
+					fmt.Fprintf(w, "# Rank %d/%d with %d/%d particles \n", rank, size, nlocal, npart)
+				}
+
+				for ip := 0; ip < nlocal; ip++ {
+					for i := range fieldnames {
+						fmt.Fprintf(w, fmts[i], lpp1[i][ip])
+						fmt.Fprint(w, " ")
+					}
+					fmt.Fprint(w, "\n")
+				}
+
+			}
+
+			if err = mpi.Barrier(petscgo.WORLD); err != nil {
+				return err
+			}
+		}
+
+		err = pp.RestoreArray(lpp)
+	}
+	return err
 }
