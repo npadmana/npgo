@@ -84,7 +84,7 @@ func (v *Vec) Copy(dst *Vec) error {
 	return nil
 }
 
-// LocalSize returns the local size 
+// LocalSize returns the local size
 func (v *Vec) LocalSize() (int64, error) {
 	var ll C.PetscInt
 	if perr := C.VecGetLocalSize(v.v, &ll); perr != 0 {
@@ -137,7 +137,7 @@ func (v *Vec) Set(a float64) error {
 	return nil
 }
 
-// GetArray sets the Arr 
+// GetArray sets the Arr
 func (v *Vec) GetArray() error {
 	size, err := v.LocalSize()
 	if err != nil {
@@ -164,7 +164,7 @@ func (v *Vec) RestoreArray() error {
 	return nil
 }
 
-//SetValues sets values based on global indices. If add is true, then use ADD_VALUES, otherwise INSERT_VALUES. 
+//SetValues sets values based on global indices. If add is true, then use ADD_VALUES, otherwise INSERT_VALUES.
 //Must be followed by AssemblyBegin/End
 func (v *Vec) SetValues(ix []int64, y []float64, add bool) error {
 	var iora C.InsertMode = C.INSERT_VALUES
