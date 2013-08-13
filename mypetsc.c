@@ -16,11 +16,6 @@ char* petscNullChar() {
 	return (char*) NULL;
 };
 
-void petscRankSize(int *rank, int *size) {
-	MPI_Comm_rank(PETSC_COMM_WORLD, rank);
-	MPI_Comm_size(PETSC_COMM_WORLD, size);
-}
-
 PetscErrorCode mypetscPrintf(char* s) {
 	return PetscPrintf(PETSC_COMM_WORLD, s);
 }

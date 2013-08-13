@@ -1,7 +1,7 @@
-// Package petscgo contains bindings between PETSc and Go. 
+// Package petscgo contains bindings between PETSc and Go.
 package petscgo
 
-/* 
+/*
 Author : Nikhil Padmanabhan, Yale Univ.
 
 This uses pkg-config to handle all the setup.
@@ -28,20 +28,24 @@ import (
 	"log"
 	"os"
 	"unsafe"
+
+	"github.com/npadmana/mpi"
 )
 
 // Some common PETSc variables
 var (
-	NULL      = 0   // PETSC_NULL is defined the same way, and deprecated in 3.4
+	NULL      = 0 // PETSC_NULL is defined the same way, and deprecated in 3.4
 	NULLCHAR  = C.petscNullChar()
 	DECIDE    = int64(C.PETSC_DECIDE)
 	DETERMINE = int64(C.PETSC_DETERMINE)
 )
 
+var WORLD mpi.Comm
+
 // Fatal calls MPI_Abort
 func Fatal(err error) {
 	log.Println("Calling MPI_Abort : ", err)
-	C.petscAbort()
+	mpi.Abort(WORLD, -1)
 }
 
 // Initialize initializes the PETSc environment
@@ -73,6 +77,9 @@ func Initialize() error {
 		os.Args = append(os.Args, C.GoString(argv[i]))
 		C.free(unsafe.Pointer(argv[i]))
 	}
+
+	// Set World
+	WORLD = mpi.Comm(C.PETSC_COMM_WORLD)
 
 	return nil
 }
@@ -116,9 +123,16 @@ func SyncFlush() error {
 	return nil
 }
 
-// RankSize returns the rank and size 
+// RankSize returns the rank and size
 func RankSize() (int, int) {
-	var cr, cs C.int
-	C.petscRankSize(&cr, &cs)
-	return int(cr), int(cs)
+	rank, err := mpi.Rank(WORLD)
+	if err != nil {
+		Fatal(err)
+	}
+	size, err := mpi.Size(WORLD)
+	if err != nil {
+		Fatal(err)
+	}
+
+	return rank, size
 }
