@@ -17,6 +17,7 @@ func (p pstruct) String() string {
 }
 
 func dump(pp []pstruct, rank int) {
+	petscgo.SyncPrintf("--- rank : %d \n", rank)
 	for i := range pp {
 		petscgo.SyncPrintf("%s\n", pp[i])
 	}
@@ -76,9 +77,10 @@ func main() {
 		mpirank[0] = int64((rank + 1) % size)
 	}
 
-	err = pp.Scatter(localndx, mpirank)
-	if err != nil {
-		petscgo.Fatal(err)
-	}
+	petscgo.Printf("\n\n\n")
+	pp.Scatter(localndx, mpirank)
+	lpp, _ = pp.GetArray().([]pstruct)
+	dump(lpp, rank)
+	pp.RestoreArray()
 
 }

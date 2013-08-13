@@ -130,3 +130,12 @@ func (s *StructVec) SetValues(ix []int64, arr interface{}) error {
 	ptr := v1.Index(0).Addr().Pointer()
 	return s.v.SetValuesBlockedPtr(ix, ptr, false)
 }
+
+// OwnRange returns the ownership range
+func (s *StructVec) OwnRange() (int64, int64, error) {
+	lo, hi, err := s.v.OwnRange()
+	if err != nil {
+		return -1, -1, nil
+	}
+	return lo / s.bs, hi / s.bs, nil
+}
