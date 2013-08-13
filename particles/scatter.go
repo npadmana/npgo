@@ -13,7 +13,7 @@ import (
 // Note that this is completely general, and a particle may be shunted to many ranks (useful for ghosts).
 // Also, note that localndx and mpirank will be modified by this routine.
 //
-func (p Particle) Scatter(localndx, mpirank []int64) error {
+func (s *StructVec) Scatter(localndx, mpirank []int64) error {
 
 	// Get the rank and size
 	rank, size := petscgo.RankSize()

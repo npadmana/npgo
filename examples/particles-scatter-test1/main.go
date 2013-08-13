@@ -1,11 +1,27 @@
 package main
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/npadmana/petscgo"
 	"github.com/npadmana/petscgo/particles"
 )
+
+type pstruct struct {
+	pos [3]float32
+	w   float32
+}
+
+func (p pstruct) String() string {
+	return fmt.Sprintf("(%7.4f, %7.4f, %7.4f, %7.4f)", p.pos[0], p.pos[1], p.pos[2], p.w)
+}
+
+func dump(pp []pstruct, rank int) {
+	for i := range pp {
+		petscgo.SyncPrintf("%s\n", pp[i])
+	}
+	petscgo.SyncFlush()
+}
 
 func main() {
 	// PETSc initialization
@@ -24,35 +40,23 @@ func main() {
 	if rank == 0 {
 		np1 = 2
 	}
-	pp, err := particles.New([]string{"x", "y", "z"}, np1, petscgo.DETERMINE)
+	pp, err := particles.NewStructVec(pstruct{}, np1, petscgo.DETERMINE)
 	if err != nil {
 		petscgo.Fatal(err)
 	}
 	defer pp.Destroy()
-	n1, _ := pp["x"].LocalSize()
-	petscgo.SyncPrintf("%d/%d rank has local size %d\n", rank, size, n1)
-	petscgo.SyncFlush()
 
-	// Fill these in
-	lpp, err := pp.GetArray([]string{"x", "y", "z"})
-	if err != nil {
-		petscgo.Fatal(err)
-	}
-	map1 := map[string]float64{"x": 1, "y": 2, "z": 3}
-	for k, v := range lpp {
-		for i := range v {
-			v[i] = (float64(i) + 1) * (map1[k] + float64(rank)*10)
+	lpp, _ := pp.GetArray().([]pstruct)
+	for i := range lpp {
+		for j := 0; j < 3; j++ {
+			lpp[i].pos[j] = (float32(i) + 1) * (float32(j + 1 + rank*10))
 		}
 	}
-	err = pp.RestoreArray(lpp)
-	if err != nil {
-		petscgo.Fatal(err)
-	}
+	pp.RestoreArray()
 
-	err = pp.Dump(os.Stdout, []string{"x", "y", "z"}, []string{"%6.2f"}, true)
-	if err != nil {
-		petscgo.Fatal(err)
-	}
+	lpp, _ = pp.GetArray().([]pstruct)
+	dump(lpp, rank)
+	pp.RestoreArray()
 
 	// Set up scatters
 	var localndx, mpirank []int64

@@ -49,6 +49,19 @@ func NewGeneralIS(nlocal int64, idx []int64, icopy bool) (*IS, error) {
 	return ret, nil
 }
 
+// NewBlockedIS creates a blocked index set
+//
+// icopy == true means that the indices are copied, whereas icopy == false means that the PETSC_USE_POINTER is called.
+// note that if icopy==false, you must *NOT* delete this pointer.
+func NewBlockedIS(bs, nlocal int64, idx []int64) (*IS, error) {
+	ret := new(IS)
+	perr := C.ISCreateBlock(C.PETSC_COMM_WORLD, C.PetscInt(bs), C.PetscInt(nlocal), (*C.PetscInt)(unsafe.Pointer(&idx[0])), C.PETSC_COPY_VALUES, &ret.is)
+	if perr != 0 {
+		return nil, errors.New("Error creating blocked index set")
+	}
+	return ret, nil
+}
+
 // Destroy frees the index set
 func (i *IS) Destroy() error {
 	perr := C.ISDestroy(&i.is)
