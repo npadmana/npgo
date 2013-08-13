@@ -41,6 +41,29 @@ func NewVec(local, global int64) (*Vec, error) {
 	return v, nil
 }
 
+// NewVecBlocked creates a new blocked MPI vector
+func NewVecBlocked(local, global, bs int64) (*Vec, error) {
+	v := new(Vec)
+	perr := C.VecCreate(C.PETSC_COMM_WORLD, &v.v)
+	if perr != 0 {
+		return nil, errors.New("Error creating vector")
+	}
+	perr = C.setTypeMPI(v.v)
+	if perr != 0 {
+		return nil, errors.New("Error creating vector -- setting type")
+	}
+	perr = C.VecSetBlockSize(v.v, C.PetscInt(bs))
+	if perr != 0 {
+		return nil, errors.New("Error creating vector -- setting bs")
+	}
+	perr = C.VecSetSizes(v.v, C.PetscInt(local), C.PetscInt(global))
+	if perr != 0 {
+		return nil, errors.New("Error creating vector -- setting bs")
+	}
+
+	return v, nil
+}
+
 // Destroy destroys the vector
 func (v *Vec) Destroy() error {
 	perr := C.VecDestroy(&v.v)
@@ -172,6 +195,20 @@ func (v *Vec) SetValues(ix []int64, y []float64, add bool) error {
 		iora = C.ADD_VALUES
 	}
 	perr := C.VecSetValues(v.v, C.PetscInt(len(ix)), (*C.PetscInt)(unsafe.Pointer(&ix[0])), (*C.PetscScalar)(unsafe.Pointer(&y[0])), iora)
+	if perr != 0 {
+		return errors.New("Error setting values")
+	}
+	return nil
+}
+
+//SetValuesBlockedPtr sets values based on global indices. If add is true, then use ADD_VALUES, otherwise INSERT_VALUES.
+//Must be followed by AssemblyBegin/End
+func (v *Vec) SetValuesBlockedPtr(ix []int64, y uintptr, add bool) error {
+	var iora C.InsertMode = C.INSERT_VALUES
+	if add {
+		iora = C.ADD_VALUES
+	}
+	perr := C.VecSetValuesBlocked(v.v, C.PetscInt(len(ix)), (*C.PetscInt)(unsafe.Pointer(&ix[0])), (*C.PetscScalar)(unsafe.Pointer(y)), iora)
 	if perr != 0 {
 		return errors.New("Error setting values")
 	}

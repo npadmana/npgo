@@ -22,3 +22,7 @@ PetscErrorCode mypetscPrintf(char* s) {
 PetscErrorCode mypetscSyncPrintf(char* s) {
 	return PetscSynchronizedPrintf(PETSC_COMM_WORLD, s);
 }
+
+PetscErrorCode setTypeMPI(Vec v) {
+	return VecSetType(v, VECMPI);
+}
