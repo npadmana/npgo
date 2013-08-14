@@ -4,6 +4,7 @@ int sizePetscReal();
 int sizePetscInt();
 void petscAbort();
 char* petscNullChar();
+Vec petscNullVec();
 
 
 PetscErrorCode mypetscPrintf(char* s);

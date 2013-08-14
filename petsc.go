@@ -36,6 +36,7 @@ import (
 var (
 	NULL      = 0 // PETSC_NULL is defined the same way, and deprecated in 3.4
 	NULLCHAR  = C.petscNullChar()
+	NULLVEC   = C.petscNullVec()
 	DECIDE    = int64(C.PETSC_DECIDE)
 	DETERMINE = int64(C.PETSC_DETERMINE)
 )

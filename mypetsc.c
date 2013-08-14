@@ -16,6 +16,10 @@ char* petscNullChar() {
 	return (char*) NULL;
 };
 
+Vec petscNullVec() {
+	return (Vec) NULL;
+}
+
 PetscErrorCode mypetscPrintf(char* s) {
 	return PetscPrintf(PETSC_COMM_WORLD, s);
 }

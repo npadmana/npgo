@@ -64,6 +64,23 @@ func NewVecBlocked(local, global, bs int64) (*Vec, error) {
 	return v, nil
 }
 
+// NewGhostVecBlocked creates a ghosted vector where the ghosts are specified by blocks
+//
+// bs is the blocksize and ghostndx are the
+// indices of the ghosts. Note that local and global are the total number of elements (not
+// blocsk), while nghostblocks and ghostndx are specified in terms of blocks.
+//
+func NewGhostVecBlocked(local, global, bs int64, ghostndx []int64) (*Vec, error) {
+	v := new(Vec)
+	ng := int64(len(ghostndx))
+	perr := C.VecCreateGhostBlock(C.PETSC_COMM_WORLD, C.PetscInt(bs), C.PetscInt(local), C.PetscInt(global),
+		C.PetscInt(ng), (*C.PetscInt)(unsafe.Pointer(&ghostndx[0])), &v.v)
+	if perr != 0 {
+		return nil, errors.New("Error creating vector")
+	}
+	return v, nil
+}
+
 // Destroy destroys the vector
 func (v *Vec) Destroy() error {
 	perr := C.VecDestroy(&v.v)
@@ -356,5 +373,75 @@ func (w *Vec) WAXPY(x, y *Vec, alpha float64) error {
 	if perr != 0 {
 		return errors.New("Error in AYPX")
 	}
+	return nil
+}
+
+// GhostGetLocalForm returns a local representation of a ghosted vector, nil if the
+// vector is not ghosted. Use Destroy to clean up when done.
+func (v *Vec) GhostGetLocalForm() (*Vec, error) {
+	lv := new(Vec)
+	perr := C.VecGhostGetLocalForm(v.v, &lv.v)
+	if perr != 0 {
+		return nil, errors.New("Error getting local ghosted form of vector")
+	}
+	if lv.v == NULLVEC {
+		return nil, nil
+	}
+	return lv, nil
+}
+
+// GhostUpdateBegin starts an update of the ghost cells.
+//
+// add sets the InsertMode (ADD_VALUES or INSERT_VALUES) while forward
+// scatters from/to the owning process
+func (v *Vec) GhostUpdateBegin(add, forward bool) error {
+	var iora C.InsertMode
+	var smode C.ScatterMode
+	switch add {
+	case true:
+		iora = C.ADD_VALUES
+	case false:
+		iora = C.INSERT_VALUES
+	}
+	switch forward {
+	case true:
+		smode = C.SCATTER_FORWARD
+	case false:
+		smode = C.SCATTER_REVERSE
+	}
+
+	perr := C.VecGhostUpdateBegin(v.v, iora, smode)
+	if perr != 0 {
+		return errors.New("Error starting ghost update")
+	}
+
+	return nil
+}
+
+// GhostUpdateEnd starts an update of the ghost cells.
+//
+// add sets the InsertMode (ADD_VALUES or INSERT_VALUES) while forward
+// scatters from/to the owning process
+func (v *Vec) GhostUpdateEnd(add, forward bool) error {
+	var iora C.InsertMode
+	var smode C.ScatterMode
+	switch add {
+	case true:
+		iora = C.ADD_VALUES
+	case false:
+		iora = C.INSERT_VALUES
+	}
+	switch forward {
+	case true:
+		smode = C.SCATTER_FORWARD
+	case false:
+		smode = C.SCATTER_REVERSE
+	}
+
+	perr := C.VecGhostUpdateEnd(v.v, iora, smode)
+	if perr != 0 {
+		return errors.New("Error ending ghost update")
+	}
+
 	return nil
 }
