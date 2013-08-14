@@ -1,4 +1,4 @@
-package particles
+package structvec
 
 import (
 	"errors"

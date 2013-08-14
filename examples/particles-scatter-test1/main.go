@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/npadmana/petscgo"
-	"github.com/npadmana/petscgo/particles"
+	"github.com/npadmana/petscgo/structvec"
 )
 
 type pstruct struct {
@@ -41,7 +41,7 @@ func main() {
 	if rank == 0 {
 		np1 = 2
 	}
-	pp, err := particles.NewStructVec(pstruct{}, np1, petscgo.DETERMINE)
+	pp, err := structvec.NewStructVec(pstruct{}, np1, petscgo.DETERMINE)
 	if err != nil {
 		petscgo.Fatal(err)
 	}

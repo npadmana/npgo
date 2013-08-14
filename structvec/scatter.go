@@ -1,8 +1,7 @@
-package particles
+package structvec
 
 import (
 	"errors"
-	_ "unsafe"
 
 	"github.com/npadmana/mpi"
 	"github.com/npadmana/petscgo"

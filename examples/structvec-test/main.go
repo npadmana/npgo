@@ -5,7 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/npadmana/petscgo"
-	"github.com/npadmana/petscgo/particles"
+	"github.com/npadmana/petscgo/structvec"
 )
 
 type pstruct struct {
@@ -35,7 +35,7 @@ func main() {
 	}()
 	rank, _ := petscgo.RankSize()
 
-	v, err := particles.NewStructVec(pstruct{}, petscgo.DECIDE, 10)
+	v, err := structvec.NewStructVec(pstruct{}, petscgo.DECIDE, 10)
 	if err != nil {
 		petscgo.Fatal(err)
 	}
