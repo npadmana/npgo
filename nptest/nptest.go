@@ -20,7 +20,7 @@ func (e Eps) EqFloat64(xtrue, xin float64, s string, t *testing.T) {
 	dxt := xtrue * e.EpsRel
 	dx := math.Abs(xtrue - xin)
 	if (dx > dxt) && (dx > e.EpsAbs) {
-		t.Errorf("%s : %f expected, %s got", s, xtrue, xin)
+		t.Errorf("%s : %f expected, %f got", s, xtrue, xin)
 	}
 }
 
@@ -28,6 +28,6 @@ func (e Eps) NeqFloat64(xtrue, xin float64, s string, t *testing.T) {
 	dxt := xtrue * e.EpsRel
 	dx := math.Abs(xtrue - xin)
 	if (dx <= dxt) || (dx <= e.EpsAbs) {
-		t.Errorf("%s : %f expected, %s got", s, xtrue, xin)
+		t.Errorf("%s : %f expected, %f got", s, xtrue, xin)
 	}
 }
