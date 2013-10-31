@@ -14,4 +14,5 @@ Installation :
 Notes for the NERSC machines :
 ------------------------------
 
--- While building the external code, you will probably want to set CC=cc
+-- Use the appropriate Makefile (the Makefiles are tested on Edison, but should work on both Hopper and Edison)
+
