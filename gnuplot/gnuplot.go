@@ -23,6 +23,7 @@ func handleGnuplot(p Plot, pipe io.WriteCloser) {
 	}
 }
 
+// Returns a new gnuplot instance
 func New(persist bool) (Plot, error) {
 	var cmd *exec.Cmd
 	if persist {
