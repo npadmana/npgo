@@ -43,7 +43,9 @@ func main() {
 				log.Fatal(err)
 			}
 			fmt.Printf("%s has %d records\n", fn, len(l))
+			wg.Done()
 		}(os.Args[i])
 	}
+	wg.Wait()
 	fmt.Printf("Elapsed time : %s\n", time.Since(t))
 }
