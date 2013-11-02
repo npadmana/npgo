@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"os"
@@ -14,6 +14,11 @@ import (
 	"github.com/npadmana/npgo/cosmo"
 	"github.com/npadmana/npgo/gnuplot"
 	"github.com/npadmana/npgo/gsl/spline"
+	"github.com/npadmana/npgo/lineio"
+)
+
+const (
+	dra = math.Pi / 180
 )
 
 type Pos [3]float64
@@ -22,6 +27,25 @@ var (
 	loPos = Pos{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
 	hiPos = Pos{math.MaxFloat64, math.MaxFloat64, math.MaxFloat64}
 )
+
+type fkpstruct struct {
+	Pk      float64
+	zz, fkp []float64
+}
+
+func (f *fkpstruct) Add(r io.Reader) error {
+	var z1, nz float64
+	n, err := fmt.Fscan(r, &z1, &nz)
+	if err != nil {
+		return err
+	}
+	if n != 2 {
+		return errors.New("Failed to parse line")
+	}
+	f.zz = append(f.zz, z1)
+	f.fkp = append(f.fkp, 1./(1+f.Pk*nz))
+	return nil
+}
 
 func (p *Pos) Min(p1 Pos) {
 	for i := range p {
@@ -39,44 +63,38 @@ func (p *Pos) Max(p1 Pos) {
 	}
 }
 
+type RDZW struct {
+	ra, dec, z, w float64
+}
+
+type RDZWArr []RDZW
+
+func (arr *RDZWArr) Add(r io.Reader) error {
+	var x RDZW
+	n, err := fmt.Fscan(r, &x.ra, &x.dec, &x.z, &x.w)
+	if err != nil {
+		return err
+	}
+	if n != 4 {
+		return errors.New("Failed to parse line")
+	}
+	*arr = append(*arr, x)
+	return nil
+}
+
 // The weight file is assumed to have a first header line, and then two columns
 // with z and n(z)
 func readWeight(wfn string, Pk float64) (*spline.Spline, error) {
+	var err error
+
 	fmt.Println("Reading in ", wfn)
-	ff, err := os.Open(wfn)
-	if err != nil {
+	var wstr fkpstruct
+	wstr.Pk = Pk
+	if err := lineio.Read(wfn, &wstr); err != nil {
 		return nil, err
 	}
-	defer ff.Close()
-	buf := bufio.NewReader(ff)
 
-	zz := make([]float64, 0)
-	fkp := make([]float64, 0)
-
-	// Skip first line
-	var nitem int
-	var z1, nz float64
-	var char []byte
-	err = nil
-	for err == nil {
-		char, err = buf.Peek(1)
-		if err != nil {
-			continue
-		}
-		if char[0] == '#' {
-			buf.ReadString('\n')
-		}
-		nitem, err = fmt.Fscanln(buf, &z1, &nz)
-		if err == nil {
-			if nitem != 2 {
-				return nil, errors.New("Unexpected number of elements")
-			}
-			zz = append(zz, z1)
-			fkp = append(fkp, 1/(1+nz*Pk))
-		}
-	}
-
-	sp, err := spline.New(spline.Cubic, zz, fkp)
+	sp, err := spline.New(spline.Cubic, wstr.zz, wstr.fkp)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +108,13 @@ func readWeight(wfn string, Pk float64) (*spline.Spline, error) {
 	plot <- "set term pngcairo"
 	plot <- "set output 'fkp_test.png'"
 	plot <- "plot '-' w points ps 3, '-' w lines lw 2"
-	for i := range zz {
-		plot <- fmt.Sprintln(zz[i], fkp[i])
+	for i := range wstr.zz {
+		plot <- fmt.Sprintln(wstr.zz[i], wstr.fkp[i])
 	}
 	plot <- "e"
-	for z1 = zz[0]; z1 < zz[len(zz)-1]; z1 = z1 + 0.001 {
-		nz, err = sp.Eval(z1)
-		if err != nil {
+	var nz float64
+	for z1 := wstr.zz[0]; z1 < wstr.zz[len(wstr.zz)-1]; z1 = z1 + 0.001 {
+		if nz, err = sp.Eval(z1); err != nil {
 			return nil, err
 		}
 		plot <- fmt.Sprint(z1, nz)
@@ -131,15 +149,13 @@ func splineCosmo(om, zmin, zmax float64) (*spline.Spline, error) {
 
 func doOne(infn, outfn string, zmin, zmax float64, dist, fkp *spline.Spline, minpos, maxpos *Pos) error {
 	var err error
-	var ra, dec, zred, r, w, theta, phi float64
-	var ncol, ind int
+	var r, theta, phi float64
 	var p Pos
+	var arr RDZWArr
 
-	ff, err := os.Open(infn)
-	if err != nil {
+	if err = lineio.Read(infn, &arr); err != nil {
 		return err
 	}
-	defer ff.Close()
 
 	gg, err := os.Create(outfn)
 	if err != nil {
@@ -147,42 +163,33 @@ func doOne(infn, outfn string, zmin, zmax float64, dist, fkp *spline.Spline, min
 	}
 	defer gg.Close()
 
-	ind = 1
-	elim := 0
+	ind := 1
 	maxz := -1.0
 	minz := 10.0
-	for err == nil {
-		ncol, err = fmt.Fscanln(ff, &ra, &dec, &zred, &w)
-		if err != nil {
-			continue
+	elim := 0
+	for ii := range arr {
+		switch {
+		case arr[ii].z > maxz:
+			maxz = arr[ii].z
+		case arr[ii].z < minz:
+			minz = arr[ii].z
 		}
-		if ncol != 4 {
-			return errors.New("Error, incorrect number of columns read in " + infn)
-		}
-		if zred < minz {
-			minz = zred
-		}
-		if zred > maxz {
-			maxz = zred
-		}
-		if (zred < zmin) || (zred >= zmax) {
+		if (arr[ii].z < zmin) || (arr[ii].z >= zmax) {
 			elim++
 			continue
 		}
-		theta = (math.Pi / 180) * (90 - dec)
-		phi = (math.Pi / 180) * ra
-		w, err = fkp.Eval(zred)
-		if err != nil {
-			panic("Error in fkp spline in " + infn)
-		}
-		r, err = dist.Eval(zred)
-		if err != nil {
+		theta = (math.Pi / 180) * (90 - arr[ii].dec)
+		phi = (math.Pi / 180) * arr[ii].ra
+		if r, err = dist.Eval(arr[ii].z); err != nil {
 			panic("Error in dist spline " + infn)
+		}
+		if arr[ii].w, err = fkp.Eval(arr[ii].z); err != nil {
+			panic("Error in fkp spline in " + infn)
 		}
 		p[0] = r * math.Sin(theta) * math.Cos(phi)
 		p[1] = r * math.Sin(theta) * math.Sin(phi)
 		p[2] = r * math.Cos(theta)
-		_, err = fmt.Fprintf(gg, "%10.4f %10.4f %10.4f %7.4f %8d\n", p[0], p[1], p[2], w, ind)
+		_, err = fmt.Fprintf(gg, "%10.4f %10.4f %10.4f %7.4f %8d\n", p[0], p[1], p[2], arr[ii].w, ind)
 		if err != nil {
 			panic("Error while writing file")
 		}
