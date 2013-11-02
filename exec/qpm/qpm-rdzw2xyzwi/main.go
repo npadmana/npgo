@@ -250,7 +250,6 @@ func main() {
 	}
 	defer dist.Free()
 
-	var infn, outfn string
 	minpos := hiPos
 	maxpos := loPos
 	var lock sync.Mutex
@@ -258,11 +257,11 @@ func main() {
 
 	for ii := nstart; ii < nend; ii++ {
 		wg.Add(1)
-		go func(ii int) {
+		go func(ifn int) {
 			myminpos := hiPos
 			mymaxpos := loPos
-			infn = fmt.Sprintf(infmt, ii)
-			outfn = fmt.Sprintf(outfmt, ii)
+			infn := fmt.Sprintf(infmt, ii)
+			outfn := fmt.Sprintf(outfmt, ii)
 			fmt.Printf("Processing %s --> %s ...\n", infn, outfn)
 			err = doOne(infn, outfn, zmin, zmax, dist, fkp, &myminpos, &mymaxpos)
 			if err != nil {
@@ -275,7 +274,7 @@ func main() {
 			maxpos.Max(mymaxpos)
 			lock.Unlock()
 			wg.Done()
-		}(ii)
+		}(ifn)
 	}
 
 	wg.Wait()
