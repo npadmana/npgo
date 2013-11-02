@@ -260,8 +260,8 @@ func main() {
 		go func(ifn int) {
 			myminpos := hiPos
 			mymaxpos := loPos
-			infn := fmt.Sprintf(infmt, ii)
-			outfn := fmt.Sprintf(outfmt, ii)
+			infn := fmt.Sprintf(infmt, ifn)
+			outfn := fmt.Sprintf(outfmt, ifn)
 			fmt.Printf("Processing %s --> %s ...\n", infn, outfn)
 			err = doOne(infn, outfn, zmin, zmax, dist, fkp, &myminpos, &mymaxpos)
 			if err != nil {
@@ -274,7 +274,7 @@ func main() {
 			maxpos.Max(mymaxpos)
 			lock.Unlock()
 			wg.Done()
-		}(ifn)
+		}(ii)
 	}
 
 	wg.Wait()
