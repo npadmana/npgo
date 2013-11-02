@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/npadmana/npgo/lineio"
@@ -33,11 +34,16 @@ func (arr *RDZWArr) Add(r io.Reader) error {
 
 func main() {
 	t := time.Now()
-	var l RDZWArr
-	fn := os.Args[1]
-	if err := lineio.Read(fn, &l); err != nil {
-		log.Fatal(err)
+	var wg sync.WaitGroup
+	for i := 1; i < len(os.Args)-1; i++ {
+		wg.Add(1)
+		go func(fn string) {
+			var l RDZWArr
+			if err := lineio.Read(fn, &l); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s has %d records\n", fn, len(l))
+		}(os.Args[i])
 	}
-	fmt.Printf("%s has %d records (elapsed time:%s)\n", fn, len(l), time.Since(t))
-
+	fmt.Printf("Elapsed time : %s\n", time.Since(t))
 }
