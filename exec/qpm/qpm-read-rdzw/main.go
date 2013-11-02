@@ -35,7 +35,7 @@ func (arr *RDZWArr) Add(r io.Reader) error {
 func main() {
 	t := time.Now()
 	var wg sync.WaitGroup
-	for i := 1; i < len(os.Args)-1; i++ {
+	for i := 1; i < len(os.Args); i++ {
 		wg.Add(1)
 		go func(fn string) {
 			var l RDZWArr
