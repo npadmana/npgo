@@ -2,9 +2,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"sync"
@@ -19,14 +17,10 @@ type RDZW struct {
 
 type RDZWArr []RDZW
 
-func (arr *RDZWArr) Add(r io.Reader) error {
+func (arr *RDZWArr) Add(s []byte) error {
 	var x RDZW
-	n, err := fmt.Fscan(r, &x.ra, &x.dec, &x.z, &x.w)
-	if err != nil {
+	if err := lineio.ParseToFloat64s(s, []byte{' '}, &x.ra, &x.dec, &x.z, &x.w); err != nil {
 		return err
-	}
-	if n != 4 {
-		return errors.New("Failed to parse line")
 	}
 	*arr = append(*arr, x)
 	return nil

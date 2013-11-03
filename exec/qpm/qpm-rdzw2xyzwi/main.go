@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"os"
@@ -33,14 +31,10 @@ type fkpstruct struct {
 	zz, fkp []float64
 }
 
-func (f *fkpstruct) Add(r io.Reader) error {
+func (f *fkpstruct) Add(s []byte) error {
 	var z1, nz float64
-	n, err := fmt.Fscan(r, &z1, &nz)
-	if err != nil {
+	if err := lineio.ParseToFloat64s(s, []byte{' '}, &z1, &nz); err != nil {
 		return err
-	}
-	if n != 2 {
-		return errors.New("Failed to parse line")
 	}
 	f.zz = append(f.zz, z1)
 	f.fkp = append(f.fkp, 1./(1+f.Pk*nz))
@@ -69,14 +63,10 @@ type RDZW struct {
 
 type RDZWArr []RDZW
 
-func (arr *RDZWArr) Add(r io.Reader) error {
+func (arr *RDZWArr) Add(s []byte) error {
 	var x RDZW
-	n, err := fmt.Fscan(r, &x.ra, &x.dec, &x.z, &x.w)
-	if err != nil {
+	if err := lineio.ParseToFloat64s(s, []byte{' '}, &x.ra, &x.dec, &x.z, &x.w); err != nil {
 		return err
-	}
-	if n != 4 {
-		return errors.New("Failed to parse line")
 	}
 	*arr = append(*arr, x)
 	return nil

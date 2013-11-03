@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"time"
@@ -13,7 +12,7 @@ import (
 
 type LC int
 
-func (l *LC) Add(r io.Reader) error {
+func (l *LC) Add(b []byte) error {
 	*l++
 	return nil
 }
