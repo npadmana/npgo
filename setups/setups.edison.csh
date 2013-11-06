@@ -5,5 +5,5 @@ setenv MPI_DIR $MPICH_DIR
 setenv PKG_CONFIG_PATH ${NPGO_DIR}/local/lib/pkgconfig:${MPI_DIR}/lib:${NPGO_DIR}/pkgconfigs
 setenv LD_LIBRARY_PATH ${NPGO_DIR}/local/lib:${NPGO_DIR}/clibs:${LD_LIBRARY_PATH}
 setenv PETSC_DIR ${NPGO_DIR}/local
-setenv C_INCLUDE_PATH $PNPGO_DIR}/clibs
+setenv C_INCLUDE_PATH ${NPGO_DIR}/clibs
 
