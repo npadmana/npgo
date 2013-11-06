@@ -1,0 +1,7 @@
+Name: npmpi
+Description: My MPI Wrappers
+Version: 0
+#
+prefix=/global/homes/n/npadmana/myWork/gocode/src/github.com/npadmana/npgo
+Libs: -L${prefix}/clibs -lnpmpi
+Cflags: -I${prefix}/clibs
