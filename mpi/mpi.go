@@ -27,7 +27,7 @@ var (
 )
 
 var (
-	MPI_i64 = MpiType(C.mpitype(0))
+	MPI_i64 = C.mpitype(0)
 )
 
 // Initialize initializes the MPI environment

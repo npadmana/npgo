@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/npadmana/mpi"
+	"github.com/npadmana/npgo/mpi"
 	"log"
 )
 
