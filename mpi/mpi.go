@@ -3,8 +3,7 @@
 package mpi
 
 /*
-#cgo pkg-config: ompi mpich
-#cgo LDFLAGS: -lnpmpi -L../clibs
+#cgo pkg-config: ompi mpich npmpi
 
 #include <stdlib.h>
 #include "npmpi.h"
@@ -23,11 +22,11 @@ type Op C.MPI_Op            // MPI Optypes
 type MpiType C.MPI_Datatype // MPI Datatypes
 
 var (
-	SUM = C.mpiop(0) // MPI_SUM
+	SUM = Op(C.mpiop(0)) // MPI_SUM
 )
 
 var (
-	MPI_i64 = C.mpitype(0)
+	MPI_i64 = MpiType(C.mpitype(0))
 )
 
 // Initialize initializes the MPI environment
@@ -67,12 +66,12 @@ func Finalize() error {
 
 // AllReduceInt64 : MPI_Allreduce for int64
 func AllReduceInt64(comm Comm, in, out *int64, n int, op Op) {
-	C.MPI_Allreduce(unsafe.Pointer(in), unsafe.Pointer(out), C.int(n), MPI_i64, SUM, C.MPI_Comm(comm))
+	C.MPI_Allreduce(unsafe.Pointer(in), unsafe.Pointer(out), C.int(n), C.MPI_Datatype(MPI_i64), C.MPI_Op(SUM), C.MPI_Comm(comm))
 }
 
 // AllGatherInt64 : MPI_Allgather for int64
 func AllGatherInt64(comm Comm, in, out []int64) {
-	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), MPI_i64, unsafe.Pointer(&out[0]), C.int(len(in)), MPI_i64, C.MPI_Comm(comm))
+	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), MPI_i64, unsafe.Pointer(&out[0]), C.int(len(in)), C.MPI_Datatype(MPI_i64), C.MPI_Comm(comm))
 }
 
 // Abort calls MPI_Abort
@@ -116,6 +115,6 @@ func Size(comm Comm) (int, error) {
 // TypeSize returns the size of an MPI type
 func TypeSize(t1 MpiType) int {
 	var n C.int
-	C.MPI_Type_size(t1, &n)
+	C.MPI_Type_size(C.MPI_Datatype(t1), &n)
 	return int(n)
 }
