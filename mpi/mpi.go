@@ -71,7 +71,7 @@ func AllReduceInt64(comm Comm, in, out *int64, n int, op Op) {
 
 // AllGatherInt64 : MPI_Allgather for int64
 func AllGatherInt64(comm Comm, in, out []int64) {
-	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), MPI_i64, unsafe.Pointer(&out[0]), C.int(len(in)), C.MPI_Datatype(MPI_i64), C.MPI_Comm(comm))
+	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), C.MPI_Datatype(MPI_i64), unsafe.Pointer(&out[0]), C.int(len(in)), C.MPI_Datatype(MPI_i64), C.MPI_Comm(comm))
 }
 
 // Abort calls MPI_Abort
