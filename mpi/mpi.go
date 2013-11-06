@@ -23,7 +23,7 @@ type Op C.MPI_Op            // MPI Optypes
 type MpiType C.MPI_Datatype // MPI Datatypes
 
 var (
-	SUM = Op(C.mpiop(0)) // MPI_SUM
+	SUM = C.mpiop(0) // MPI_SUM
 )
 
 var (
@@ -67,17 +67,17 @@ func Finalize() error {
 
 // AllReduceInt64 : MPI_Allreduce for int64
 func AllReduceInt64(comm Comm, in, out *int64, n int, op Op) {
-	C.MPI_Allreduce(unsafe.Pointer(in), unsafe.Pointer(out), C.int(n), MPI_i64, SUM, comm)
+	C.MPI_Allreduce(unsafe.Pointer(in), unsafe.Pointer(out), C.int(n), MPI_i64, SUM, C.MPI_Comm(comm))
 }
 
 // AllGatherInt64 : MPI_Allgather for int64
 func AllGatherInt64(comm Comm, in, out []int64) {
-	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), MPI_i64, unsafe.Pointer(&out[0]), C.int(len(in)), MPI_i64, comm)
+	C.MPI_Allgather(unsafe.Pointer(&in[0]), C.int(len(in)), MPI_i64, unsafe.Pointer(&out[0]), C.int(len(in)), MPI_i64, C.MPI_Comm(comm))
 }
 
 // Abort calls MPI_Abort
 func Abort(comm Comm, err int) error {
-	perr := C.MPI_Abort(comm, C.int(err))
+	perr := C.MPI_Abort(C.MPI_Comm(comm), C.int(err))
 	if perr != 0 {
 		return errors.New("Error aborting!?!!")
 	}
@@ -86,7 +86,7 @@ func Abort(comm Comm, err int) error {
 
 // Barrier calls MPI_Barrier
 func Barrier(comm Comm) error {
-	perr := C.MPI_Barrier(comm)
+	perr := C.MPI_Barrier(C.MPI_Comm(comm))
 	if perr != 0 {
 		return errors.New("Error calling Barrier")
 	}
@@ -96,7 +96,7 @@ func Barrier(comm Comm) error {
 // Rank returns the MPI_Rank
 func Rank(comm Comm) (int, error) {
 	var r C.int
-	perr := C.MPI_Comm_rank(comm, &r)
+	perr := C.MPI_Comm_rank(C.MPI_Comm(comm), &r)
 	if perr != 0 {
 		return -1, errors.New("Error calling MPI_Comm_rank")
 	}
@@ -106,7 +106,7 @@ func Rank(comm Comm) (int, error) {
 // Size returns the MPI_Size
 func Size(comm Comm) (int, error) {
 	var r C.int
-	perr := C.MPI_Comm_size(comm, &r)
+	perr := C.MPI_Comm_size(C.MPI_Comm(comm), &r)
 	if perr != 0 {
 		return -1, errors.New("Error calling MPI_Comm_size")
 	}

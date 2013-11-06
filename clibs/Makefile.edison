@@ -3,3 +3,5 @@ SHELL:=/bin/bash
 all :
 	export XTPE_LINK_TYPE=dynamic; \
 	cc -shared -fPIC -o libnpmpi.so npmpi.c
+
+	
