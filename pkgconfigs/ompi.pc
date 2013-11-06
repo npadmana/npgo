@@ -1,0 +1,3 @@
+Name: Dummy 
+Description: Portable high-performance MPI implementation
+Version: 0

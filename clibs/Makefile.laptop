@@ -1,0 +1,2 @@
+all :
+	mpicc -dynamiclib -o libnpmpi.so npmpi.c
