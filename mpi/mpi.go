@@ -3,10 +3,38 @@
 package mpi
 
 /*
-#cgo pkg-config: ompi mpich npmpi
+#cgo pkg-config: ompi mpich
 
 #include <stdlib.h>
-#include "npmpi.h"
+#include "mpi.h"
+
+MPI_Op mpiop(int i) {
+        MPI_Op retval;
+        retval = MPI_SUM; // This prevents uninitialized warnings
+        switch(i) {
+        case 0 :
+                retval = MPI_SUM;
+                break;
+        default :
+                MPI_Abort(MPI_COMM_WORLD,1);
+        }
+        return retval;
+}
+
+MPI_Datatype mpitype(int i) {
+        MPI_Datatype retval;
+        retval = MPI_LONG; // This prevents uninitialized warnings
+        switch(i) {
+        case 0 :
+                retval = MPI_LONG;
+                break;
+        default :
+                MPI_Abort(MPI_COMM_WORLD,1);
+        }
+        return retval;
+}
+
+
 
 */
 import "C"
