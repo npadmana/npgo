@@ -4,6 +4,8 @@ tarballs/build
 
 *.sublime-workspace
 
+docs/*-docs
+
 
 #----------------------
 
