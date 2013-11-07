@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/petsc"
 )
 
 func main() {
-	petscgo.Initialize()
-	defer petscgo.Finalize()
-	rank, size := petscgo.RankSize()
+	petsc.Initialize()
+	defer petsc.Finalize()
+	rank, size := petsc.RankSize()
 
 	// Set up basic elements for the vector
 	var bs, nlocal, nlocal1 int64
@@ -17,11 +17,11 @@ func main() {
 	r64 := int64(rank) * nlocal1
 	s64 := int64(size) * nlocal1
 	gndx := []int64{(r64 + nlocal1) % s64, (s64 + r64 - 1) % s64}
-	petscgo.SyncPrintf("Ghost indices : %v \n", gndx)
-	petscgo.SyncFlush()
+	petsc.SyncPrintf("Ghost indices : %v \n", gndx)
+	petsc.SyncFlush()
 
 	// Create the vector
-	v, _ := petscgo.NewGhostVecBlocked(nlocal, petscgo.DETERMINE, bs, gndx)
+	v, _ := petsc.NewGhostVecBlocked(nlocal, petsc.DETERMINE, bs, gndx)
 	defer v.Destroy()
 
 	// Fill in the local versions of the array
@@ -32,7 +32,7 @@ func main() {
 	}
 	v.RestoreArray()
 
-	petscgo.Printf("Filled in vector\n")
+	petsc.Printf("Filled in vector\n")
 
 	// Update ghost values
 	v.GhostUpdateBegin(false, true)
@@ -41,12 +41,12 @@ func main() {
 	// Get the local values and print them
 	lv, _ := v.GhostGetLocalForm()
 	lv.GetArray()
-	petscgo.SyncPrintf("Rank %d : ", rank)
+	petsc.SyncPrintf("Rank %d : ", rank)
 	for _, val := range lv.Arr {
-		petscgo.SyncPrintf("%3d ", int(val))
+		petsc.SyncPrintf("%3d ", int(val))
 	}
-	petscgo.SyncPrintf("\n")
-	petscgo.SyncFlush()
+	petsc.SyncPrintf("\n")
+	petsc.SyncFlush()
 	lv.RestoreArray()
 	lv.Destroy()
 
@@ -67,12 +67,12 @@ func main() {
 
 	// Reprint, only with local pieces
 	v.GetArray()
-	petscgo.SyncPrintf("Rank %d : ", rank)
+	petsc.SyncPrintf("Rank %d : ", rank)
 	for _, val := range v.Arr {
-		petscgo.SyncPrintf("%3d ", int(val))
+		petsc.SyncPrintf("%3d ", int(val))
 	}
-	petscgo.SyncPrintf("\n")
-	petscgo.SyncFlush()
+	petsc.SyncPrintf("\n")
+	petsc.SyncFlush()
 	v.RestoreArray()
 
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/npadmana/petscgo"
-	"github.com/npadmana/petscgo/structvec"
+	"github.com/npadmana/npgo/petsc"
+	"github.com/npadmana/npgo/petsc/structvec"
 )
 
 type pstruct struct {
@@ -25,55 +25,55 @@ func (p pstruct) String() string {
 
 func main() {
 	// PETSc initialization
-	if err := petscgo.Initialize(); err != nil {
-		petscgo.Fatal(err)
+	if err := petsc.Initialize(); err != nil {
+		petsc.Fatal(err)
 	}
 	defer func() {
-		if err := petscgo.Finalize(); err != nil {
-			petscgo.Fatal(err)
+		if err := petsc.Finalize(); err != nil {
+			petsc.Fatal(err)
 		}
 	}()
-	rank, _ := petscgo.RankSize()
+	rank, _ := petsc.RankSize()
 
-	v, err := structvec.NewStructVec(pstruct{}, petscgo.DECIDE, 10)
+	v, err := structvec.NewStructVec(pstruct{}, petsc.DECIDE, 10)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	defer v.Destroy()
-	petscgo.Printf("Type of v : %s\n", v.Type())
-	petscgo.Printf("Size of v : %d\n", v.BlockSize())
-	petscgo.SyncPrintf("Local size = %d\n", v.Nlocal)
-	petscgo.SyncFlush()
-	petscgo.Printf("Global size = %d\n", v.Ntotal)
+	petsc.Printf("Type of v : %s\n", v.Type())
+	petsc.Printf("Size of v : %d\n", v.BlockSize())
+	petsc.SyncPrintf("Local size = %d\n", v.Nlocal)
+	petsc.SyncFlush()
+	petsc.Printf("Global size = %d\n", v.Ntotal)
 
 	// local particle data
 	lpp, ok := v.GetArray().([]pstruct)
 	if !ok {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	for i := range lpp {
 		lpp[i].FillRandom()
 	}
 	err = v.RestoreArray()
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 
 	// Print array
 	lpp, ok = v.GetArray().([]pstruct)
 	if !ok {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	for i := range lpp {
-		petscgo.SyncPrintf("%s\n", lpp[i])
+		petsc.SyncPrintf("%s\n", lpp[i])
 	}
-	petscgo.SyncFlush()
+	petsc.SyncFlush()
 	err = v.RestoreArray()
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 
-	petscgo.Printf("----------------\n")
+	petsc.Printf("----------------\n")
 
 	// Fiddle with array
 	if rank == 0 {
@@ -81,7 +81,7 @@ func main() {
 		ix := []int64{3, 7}
 		err = v.SetValues(ix, lpp)
 		if err != nil {
-			petscgo.Fatal(err)
+			petsc.Fatal(err)
 		}
 	}
 	v.AssemblyBegin()
@@ -90,15 +90,15 @@ func main() {
 	// Print array
 	lpp, ok = v.GetArray().([]pstruct)
 	if !ok {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	for i := range lpp {
-		petscgo.SyncPrintf("%s\n", lpp[i])
+		petsc.SyncPrintf("%s\n", lpp[i])
 	}
-	petscgo.SyncFlush()
+	petsc.SyncFlush()
 	err = v.RestoreArray()
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 
 }

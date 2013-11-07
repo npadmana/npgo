@@ -5,18 +5,18 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/petsc"
 )
 
 type StructVec struct {
-	v              *petscgo.Vec // Store the vector
+	v              *petsc.Vec // Store the vector
 	bs             int64        // Store the blocksize
 	t              reflect.Type // Store the structure information
 	Nlocal, Ntotal int64        // Local & global sizes
 }
 
 func Partition(nglobal int64) int64 {
-	rank, size := petscgo.RankSize()
+	rank, size := petsc.RankSize()
 	retval := nglobal / int64(size)
 	rem := nglobal % int64(size)
 
@@ -45,13 +45,13 @@ func NewStructVec(st interface{}, nlocal, nglobal int64) (*StructVec, error) {
 	r.bs = r.bs / 8
 
 	// Set nlocal if not set
-	if nlocal == petscgo.DECIDE {
+	if nlocal == petsc.DECIDE {
 		nlocal = Partition(nglobal)
 	}
 
 	// Now allocate the vector
 	r.Nlocal = nlocal
-	r.v, err = petscgo.NewVecBlocked(r.Nlocal*r.bs, petscgo.DETERMINE, r.bs)
+	r.v, err = petsc.NewVecBlocked(r.Nlocal*r.bs, petsc.DETERMINE, r.bs)
 	if err != nil {
 		return nil, errors.New("Error allocating vector")
 	}
@@ -75,12 +75,12 @@ func (s *StructVec) Destroy() error {
 
 func (s *StructVec) GetArray() interface{} {
 	if err := s.v.GetArray(); err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 
 	// Make sure the lengths match
 	if int64(len(s.v.Arr)) != (s.Nlocal * s.bs) {
-		petscgo.Fatal(errors.New("Unexpected size of array"))
+		petsc.Fatal(errors.New("Unexpected size of array"))
 	}
 
 	sliceHeaderIn := (*reflect.SliceHeader)(unsafe.Pointer(&s.v.Arr))

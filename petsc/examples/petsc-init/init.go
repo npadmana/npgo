@@ -1,21 +1,21 @@
 package main
 
 import (
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/petsc"
 )
 
 func main() {
-	if err := petscgo.Initialize(); err != nil {
-		petscgo.Fatal(err)
+	if err := petsc.Initialize(); err != nil {
+		petsc.Fatal(err)
 	}
 	defer func() {
-		if err := petscgo.Finalize(); err != nil {
-			petscgo.Fatal(err)
+		if err := petsc.Finalize(); err != nil {
+			petsc.Fatal(err)
 		}
 	}()
-	rank, size := petscgo.RankSize()
+	rank, size := petsc.RankSize()
 
-	petscgo.Printf("Initialization successful\n")
-	petscgo.SyncPrintf("Hello from rank %d of %d\n", rank, size)
-	petscgo.SyncFlush()
+	petsc.Printf("Initialization successful\n")
+	petsc.SyncPrintf("Hello from rank %d of %d\n", rank, size)
+	petsc.SyncFlush()
 }

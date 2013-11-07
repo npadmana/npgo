@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/petsc"
 )
 
 type Grid struct {
-	V             *petscgo.Vec // We store the array here
+	V             *petsc.Vec // We store the array here
 	dims, strides []int64      // Dimension information
 	lo, hi        []int64      // The lo-hi dimensions before transposition
 }
@@ -105,7 +105,7 @@ func New(dims []int64) (greal *Grid, gcmplx *Grid) {
 	// Check that dims is big enough
 	ndim := len(dims)
 	if ndim < 2 {
-		petscgo.Fatal(errors.New("The grid must at least be 2D"))
+		petsc.Fatal(errors.New("The grid must at least be 2D"))
 	}
 
 	g := new(Grid)

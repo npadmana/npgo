@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/npadmana/petscgo"
-	"github.com/npadmana/petscgo/structvec"
+	"github.com/npadmana/npgo/petsc"
+	"github.com/npadmana/npgo/petsc/structvec"
 )
 
 type pstruct struct {
@@ -17,33 +17,33 @@ func (p pstruct) String() string {
 }
 
 func dump(pp []pstruct, rank int) {
-	petscgo.SyncPrintf("--- rank : %d \n", rank)
+	petsc.SyncPrintf("--- rank : %d \n", rank)
 	for i := range pp {
-		petscgo.SyncPrintf("%s\n", pp[i])
+		petsc.SyncPrintf("%s\n", pp[i])
 	}
-	petscgo.SyncFlush()
+	petsc.SyncFlush()
 }
 
 func main() {
 	// PETSc initialization
-	if err := petscgo.Initialize(); err != nil {
-		petscgo.Fatal(err)
+	if err := petsc.Initialize(); err != nil {
+		petsc.Fatal(err)
 	}
 	defer func() {
-		if err := petscgo.Finalize(); err != nil {
-			petscgo.Fatal(err)
+		if err := petsc.Finalize(); err != nil {
+			petsc.Fatal(err)
 		}
 	}()
-	rank, size := petscgo.RankSize()
+	rank, size := petsc.RankSize()
 
 	// Create particles
 	var np1 int64 = 1
 	if rank == 0 {
 		np1 = 2
 	}
-	pp, err := structvec.NewStructVec(pstruct{}, np1, petscgo.DETERMINE)
+	pp, err := structvec.NewStructVec(pstruct{}, np1, petsc.DETERMINE)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	defer pp.Destroy()
 
@@ -77,7 +77,7 @@ func main() {
 		mpirank[0] = int64((rank + 1) % size)
 	}
 
-	petscgo.Printf("\n\n\n")
+	petsc.Printf("\n\n\n")
 	pp.Scatter(localndx, mpirank)
 	lpp, _ = pp.GetArray().([]pstruct)
 	dump(lpp, rank)

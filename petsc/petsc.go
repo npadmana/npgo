@@ -1,5 +1,5 @@
-// Package petscgo contains bindings between PETSc and Go.
-package petscgo
+// Package petsc contains bindings between PETSc and Go.
+package petsc
 
 /*
 Author : Nikhil Padmanabhan, Yale Univ.
@@ -29,7 +29,7 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/npadmana/mpi"
+	"github.com/npadmana/npgo/mpi"
 )
 
 // Some common PETSc variables

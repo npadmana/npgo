@@ -17,13 +17,13 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/petsc"
 )
 
 // Initialize initializes FFTW3 for MPI usage
 func Initialize() {
 	if C.size_ptrdiff() != 8 {
-		petscgo.Fatal(errors.New("size(ptrdiff_t) != 8"))
+		petsc.Fatal(errors.New("size(ptrdiff_t) != 8"))
 	}
 
 	// Initialize FFTW3
@@ -45,7 +45,7 @@ func Cleanup() {
 func LocalSizeTransposed(dims []int64) (int64, [2]int64, [2]int64) {
 	ndim := len(dims)
 	if ndim < 2 {
-		petscgo.Fatal(errors.New("Need at least two dimensions"))
+		petsc.Fatal(errors.New("Need at least two dimensions"))
 	}
 
 	rnk := C.int(ndim)
@@ -59,7 +59,7 @@ func LocalSizeTransposed(dims []int64) (int64, [2]int64, [2]int64) {
 	//                                               ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
 
 	var n0, n0start, n1, n1start C.ptrdiff_t
-	lsize := C.fftw_mpi_local_size_transposed(rnk, (*C.ptrdiff_t)(unsafe.Pointer(&dims1[0])), petscgo.WORLD,
+	lsize := C.fftw_mpi_local_size_transposed(rnk, (*C.ptrdiff_t)(unsafe.Pointer(&dims1[0])), petsc.WORLD,
 		&n0, &n0start, &n1, &n1start)
 
 	ln0 := [2]int64{int64(n0), int64(n0start)}

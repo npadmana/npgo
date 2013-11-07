@@ -3,9 +3,9 @@ package PW3D
 import (
 	"math/rand"
 
-	"github.com/npadmana/petscgo"
-	"github.com/npadmana/petscgo/particles"
-	"github.com/npadmana/petscgo/structvec"
+	"github.com/npadmana/npgo/petsc"
+	"github.com/npadmana/npgo/petsc/particles"
+	"github.com/npadmana/npgo/petsc/structvec"
 )
 
 // Define an example particle type
@@ -27,7 +27,7 @@ func (p Arr) GetPos(ipart int64, idim int) float32 {
 func NewVec(nlocal, nglobal int64) *structvec.StructVec {
 	v, err := structvec.NewStructVec(One{}, nlocal, nglobal)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	return v
 }

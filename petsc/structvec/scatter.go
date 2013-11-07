@@ -3,8 +3,8 @@ package structvec
 import (
 	"errors"
 
-	"github.com/npadmana/mpi"
-	"github.com/npadmana/petscgo"
+	"github.com/npadmana/npgo/mpi"
+	"github.com/npadmana/npgo/petsc"
 )
 
 // Scatter takes the particles and reshuffles them across MPI ranks according to localid and
@@ -16,13 +16,13 @@ import (
 func (s *StructVec) Scatter(localndx, mpirank []int64) {
 
 	// Get the rank and size
-	rank, size := petscgo.RankSize()
+	rank, size := petsc.RankSize()
 
 	// Work out the final number of particles
 	var npart_local, npart_final int64
 	npart_local = int64(len(mpirank))
-	mpi.AllReduceInt64(petscgo.WORLD, &npart_local, &npart_final, 1, mpi.SUM)
-	//petscgo.Printf("%d total particles expected after scatter\n", npart_final)
+	mpi.AllReduceInt64(petsc.WORLD, &npart_local, &npart_final, 1, mpi.SUM)
+	//petsc.Printf("%d total particles expected after scatter\n", npart_final)
 
 	// Allocate arrays
 	// narr[rank] are the number of particles headed for rank from the current rank (hereafter crank)
@@ -38,8 +38,8 @@ func (s *StructVec) Scatter(localndx, mpirank []int64) {
 	for _, irank := range mpirank {
 		narr[irank] += 1
 	}
-	mpi.AllGatherInt64(petscgo.WORLD, narr, narr1)
-	//petscgo.Printf("%v\n", narr1)
+	mpi.AllGatherInt64(petsc.WORLD, narr, narr1)
+	//petsc.Printf("%v\n", narr1)
 
 	// Reset narr, icount
 	for i := range narr {
@@ -68,7 +68,7 @@ func (s *StructVec) Scatter(localndx, mpirank []int64) {
 	}
 	// Assertion check
 	if rtot != npart_final {
-		petscgo.Fatal(errors.New("ASSERTION FAILURE : rtot != npart_final"))
+		petsc.Fatal(errors.New("ASSERTION FAILURE : rtot != npart_final"))
 	}
 
 	// Now we start updating localndx and mpirank
@@ -84,29 +84,29 @@ func (s *StructVec) Scatter(localndx, mpirank []int64) {
 	// Assertion check
 	for i := range icount {
 		if icount[i] != icount_check[i] {
-			petscgo.Fatal(errors.New("ASSERTION FAILURE : icount != icount_check"))
+			petsc.Fatal(errors.New("ASSERTION FAILURE : icount != icount_check"))
 		}
 	}
 
 	// Create destination
-	vecnew, err := petscgo.NewVecBlocked(narr[rank]*s.bs, petscgo.DETERMINE, s.bs)
+	vecnew, err := petsc.NewVecBlocked(narr[rank]*s.bs, petsc.DETERMINE, s.bs)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	// Create index sets
-	isin, err := petscgo.NewBlockedIS(s.bs, npart_local, localndx)
+	isin, err := petsc.NewBlockedIS(s.bs, npart_local, localndx)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
-	isout, err := petscgo.NewBlockedIS(s.bs, npart_local, mpirank)
+	isout, err := petsc.NewBlockedIS(s.bs, npart_local, mpirank)
 	if err != nil {
-		petscgo.Fatal(err)
+		petsc.Fatal(err)
 	}
 	defer isin.Destroy()
 	defer isout.Destroy()
 
 	// Create scatter context
-	ctx, err := petscgo.NewScatter(s.v, vecnew, isin, isout)
+	ctx, err := petsc.NewScatter(s.v, vecnew, isin, isout)
 	defer ctx.Destroy()
 	ctx.Begin(s.v, vecnew, false, true)
 	ctx.End(s.v, vecnew, false, true)

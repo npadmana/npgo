@@ -1,4 +1,4 @@
-package petscgo
+package petsc
 
 /*
 #cgo pkg-config: PETSc ompi
