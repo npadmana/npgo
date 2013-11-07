@@ -1,7 +1,7 @@
 package fftw3
 
 /*
-#cgo pkg-config: fftw3-mpi ompi
+#cgo pkg-config: fftw3-mpi ompi mpich
 
 #include <stddef.h>
 #include "fftw3-mpi.h"

@@ -7,13 +7,13 @@ Author : Nikhil Padmanabhan, Yale Univ.
 This uses pkg-config to handle all the setup.
 An example file is in the pkgconfig directory.
 
-This assumes that you are using OpenMPI; if not, you will need to change the ompi
+This assumes that you are using OpenMPI; if not, you will need to change the ompi mpich
 setting below
 
 */
 
 /*
-#cgo pkg-config: PETSc ompi
+#cgo pkg-config: PETSc ompi mpich
 
 #include <stddef.h>
 #include "petsc.h"

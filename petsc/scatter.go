@@ -1,7 +1,7 @@
 package petsc
 
 /*
-#cgo pkg-config: PETSc ompi
+#cgo pkg-config: PETSc ompi mpich
 
 #include "petsc.h"
 
