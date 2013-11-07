@@ -1,5 +1,9 @@
 package particles
 
+// Domainer defines the interface for domain decomposition. It defines a single
+// function, Domain that takes in particles are outputs two arrays : the localindex
+// and the MPI rank it needs to be sent to. Specifying the local index allows one
+// eg. to drop particles or to send the same particle to multiple places.
 type Domainer interface {
 	Domain(p Particle) ([]int64, []int64)
 }
