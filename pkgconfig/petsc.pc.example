@@ -1,9 +1,0 @@
-prefix=/Users/npadmana/myWork/nputils/local/petsc-3.3-p1
-libdir=/Users/npadmana/myWork/nputils/local/petsc-3.3-p1/cxx-opt/lib
-includedir=/Users/npadmana/myWork/nputils/local/petsc-3.3-p1/include
-
-Name: PETSc
-Description: PETSc
-Version: 3.3-p1
-Libs: -L/Users/npadmana/myWork/nputils/local/petsc-3.3-p1/cxx-opt/lib -lpetsc -lm
-Cflags: -I/Users/npadmana/myWork/nputils/local/petsc-3.3-p1/cxx-opt/include -I/Users/npadmana/myWork/nputils/local/petsc-3.3-p1/include 
