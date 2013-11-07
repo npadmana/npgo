@@ -2,6 +2,8 @@ sandbox
 local
 tarballs/build
 
+*.sublime-workspace
+
 
 #----------------------
 
