@@ -1,0 +1,4 @@
+FFTW
+----
+
+-- You may need to set up a pkgconfig file for fftw3_mpi.pc

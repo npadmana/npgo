@@ -25,3 +25,14 @@ petsc :
 	   --download-f2cblaslapack; \
 	make PETSC_DIR=$(NPGO_DIR)/tarballs/build/petsc-3.4.3 PETSC_ARCH=arch-darwin-c-opt all; \
 	make PETSC_DIR=$(NPGO_DIR)/tarballs/build/petsc-3.4.3 PETSC_ARCH=arch-darwin-c-opt install
+
+
+fftw :
+	mkdir -p build
+	cd build; \
+	tar xvfz ../fftw-3.3.3.tar.gz; \
+	cd fftw-3.3.3; \
+	./configure --prefix=$(NPGO_DIR)/local \
+		--enable-mpi --enable-shared; \
+	make; \
+	make install
