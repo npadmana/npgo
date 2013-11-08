@@ -2,3 +2,4 @@ FFTW
 ----
 
 -- You may need to set up a pkgconfig file for fftw3_mpi.pc
+-- We don't build this for Edison, but instead use the built version.
