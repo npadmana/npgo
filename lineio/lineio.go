@@ -34,7 +34,8 @@ var (
 )
 
 // Parse a file, based on lines. Note that arr may be modified even
-// if an error occured. arr.Add is called with a single line in it.
+// if an error occured. arr.Add is called with a single line in it, with
+// any comments and leading and trailing whitespace removed.
 // Subsequent parsing is left up to arr.Add
 func (l LineIOParams) Parse(fn string, arr LineIOType) error {
 	// Open the file
@@ -49,7 +50,7 @@ func (l LineIOParams) Parse(fn string, arr LineIOType) error {
 	var bb []byte
 	var n int
 	for scan.Scan() {
-		// Trim out leading whitespace
+		// Trim out leading and trailing whitespace
 		bb = scan.Bytes()
 		bb = bytes.TrimSpace(bb)
 		if n = bytes.IndexAny(bb, l.Comment); n != -1 {
