@@ -35,6 +35,10 @@ MPI_Datatype mpitype(int i) {
 }
 
 
+MPI_Comm retworld() {
+	return MPI_COMM_WORLD;
+}
+
 
 */
 import "C"
@@ -55,6 +59,7 @@ var (
 
 var (
 	MPI_i64 = MpiType(C.mpitype(0))
+	WORLD   = Comm(C.retworld)
 )
 
 // Initialize initializes the MPI environment
