@@ -33,8 +33,9 @@ var (
 	LineIOParamsDefault = LineIOParams{Comment: "#"}
 )
 
-// Parse in a file, based on the Line. Note that arr may be modified even
-// if an error occured. The reader only has a single line in it.
+// Parse a file, based on lines. Note that arr may be modified even
+// if an error occured. arr.Add is called with a single line in it.
+// Subsequent parsing is left up to arr.Add
 func (l LineIOParams) Parse(fn string, arr LineIOType) error {
 	// Open the file
 	ff, err := os.Open(fn)
