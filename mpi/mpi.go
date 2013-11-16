@@ -59,7 +59,7 @@ var (
 
 var (
 	MPI_i64 = MpiType(C.mpitype(0))
-	WORLD   = Comm(C.retworld)
+	WORLD   = Comm(C.retworld())
 )
 
 // Initialize initializes the MPI environment
