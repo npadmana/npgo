@@ -1,0 +1,4 @@
+echo "Hello World 1"
+echo "Hello World 2"
+echo "Isn't this great"
+./scr.sh
